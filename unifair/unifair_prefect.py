@@ -40,7 +40,11 @@ class JsonObjectsSerializer(prefect.engine.serializers.Serializer):
 @task(
     target='extract_encode_api_results.txt',
     checkpoint=True,
-    result=LocalResult(dir='../data_prefect'))
+    result=LocalResult(
+        dir='data_prefect',
+        serializer=JsonObjectsSerializer(),
+    ),
+)
 def extract_encode_api() -> List[JsonObjects]:
     output = []
     for obj_type in ['experiments', 'biosample']:
