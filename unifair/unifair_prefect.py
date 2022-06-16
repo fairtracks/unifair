@@ -15,7 +15,7 @@ from unifair.steps.imports.encode import ImportEncodeMetadataFromApi
 
 
 class JsonObjects(BaseModel):
-    objects: Dict[str, pd.DataFrame]
+    objects: Dict[str, dict]
 
     class Config:
         arbitrary_types_allowed = True
@@ -25,8 +25,9 @@ class JsonObjectsSerializer(prefect.engine.serializers.Serializer):
     def serialize(self, value: JsonObjects) -> bytes:
         # transform a Python object into bytes
         output = ''
-        for obj in value.objects.values():
-            output += json.dumps(obj, indent=4) + os.linesep
+        for el in value:
+            for obj in el.objects.values():
+                output += json.dumps(obj, indent=4) + os.linesep
         return output.encode('utf8')
 
     def deserialize(self, value: bytes) -> JsonObjects:
@@ -40,7 +41,11 @@ class JsonObjectsSerializer(prefect.engine.serializers.Serializer):
 @task(
     target='extract_encode_api_results.txt',
     checkpoint=True,
-    result=LocalResult(dir='../data_prefect'))
+    result=LocalResult(
+        dir='data_prefect',
+        serializer=JsonObjectsSerializer(),
+    ),
+)
 def extract_encode_api() -> List[JsonObjects]:
     output = []
     for obj_type in ['experiments', 'biosample']:
