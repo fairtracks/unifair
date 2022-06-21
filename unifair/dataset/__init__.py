@@ -7,9 +7,6 @@ from typing import Any, Callable, IO, Union
 
 from pydantic import BaseModel, validate_model
 
-from unifair.dataset.json import JsonDatasetToTarFileSerializer
-from unifair.dataset.pandas import PandasDatasetToTarFileSerializer
-
 
 class Dataset(ABC, UserDict, BaseModel):
     def __init__(self):
@@ -25,6 +22,18 @@ def validate(model: BaseModel):
     *_, validation_error = validate_model(model.__class__, model.__dict__)
     if validation_error:
         raise validation_error
+
+
+class Serializer(ABC):
+    @staticmethod
+    @abstractmethod
+    def serialize(dataset: Dataset):
+        pass
+
+    @staticmethod
+    @abstractmethod
+    def deserialize(serialized) -> Dataset:
+        pass
 
 
 def create_tarfile_from_dataset(dataset: Dataset,
@@ -51,9 +60,3 @@ def create_dataset_from_tarfile(dataset: Dataset,
             assert filename.endswith(f'.{file_suffix}')
             obj_type = '.'.join(filename.split('.')[:-1])
             dataset[obj_type] = data_decode_func(obj_type_file)
-
-
-DEFAULT_RESULT_TYPE_TO_SERIALIZER_MAP = {
-    'JsonDataset': JsonDatasetToTarFileSerializer,
-    'PandasDataset': PandasDatasetToTarFileSerializer
-}

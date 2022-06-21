@@ -6,6 +6,7 @@ from pydantic import validator
 from unifair.dataset import (create_dataset_from_tarfile,
                              create_tarfile_from_dataset,
                              Dataset,
+                             Serializer,
                              validate)
 
 
@@ -27,7 +28,7 @@ class JsonDataset(Dataset):
                 assert len(obj) > 0
 
 
-class JsonDatasetToTarFileSerializer:
+class JsonDatasetToTarFileSerializer(Serializer):
     @staticmethod
     def serialize(json_dataset: JsonDataset) -> Union[bytes, memoryview]:
         def json_encode_func(json_data: list) -> bytes:
