@@ -3,6 +3,7 @@ from datetime import datetime
 import os
 
 from unifair.core.data import NoData
+import unifair.dataset.util
 
 
 class WorkflowStep(ABC):
@@ -44,7 +45,7 @@ class WorkflowStep(ABC):
             '{} data object is not a subclass of {}, as required.'.format(
                 'Input' if input_data else 'Output', data_cls
         )
-        data_obj.validate()
+        unifair.dataset.util.validate()
 
     @abstractmethod
     def _run(self, input_data):
